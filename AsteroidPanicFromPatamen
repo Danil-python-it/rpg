@@ -1,0 +1,143 @@
+from pygame import *
+from random import randrange,randint
+
+L = 860
+W = 600
+window = display.set_mode((L,W))
+display.set_caption("test")
+fon = transform.scale(image.load("png/fon.jpg"),(L,W)) 
+clock = time.Clock()
+FPS = 60
+step = 5
+stutus_fon = 10
+minuts = 0
+body_asteroid = ["png/астероид2.1.png","png/астероид3.1.png"]
+asteroid1 = ["png/астероид2.1.png","png/астероид2.2.png"]
+asteroid2 = ["png/астероид3.1.png","png/астероид3.2.png"]
+patronage_ateroud = 0
+num_charges = 0
+stuts_fly = 6
+list_bullet = sprite.Group()
+all_sprite = sprite.Group()
+list_meteor = sprite.Group()
+time_metero = 0
+
+stutus = False
+
+    
+
+class GameSprite(sprite.Sprite):
+    def __init__(self,main_body,x_coor,y_coor,l=100,w=100,step=None):
+        super().__init__()
+        self.tols = main_body
+        self.x = x_coor
+        self.y = y_coor
+        self.l = l
+        self.w = w
+        var2 = randint(1,2)
+        if var2 == 2:
+            self.step = -5
+        if var2 == 1:
+            self.step = 5
+
+        if self.tols == "png/астероид2.1.png":
+            self.array = asteroid1
+        elif self.tols == "png/астероид3.1.png":
+            self.array = asteroid2
+        else:
+            pass
+        
+        self.persona = transform.scale(image.load(self.tols),(self.l,self.w))
+        self.rect = self.persona.get_rect()
+    
+    def DRAW(self):
+        window.blit(self.persona,(self.x,self.y))
+        
+
+class player(GameSprite):   
+    def update(self):
+        if going[K_RIGHT]:
+            self.x += step
+        if going[K_LEFT]:
+            self.x -= step
+    
+class bullet(GameSprite):
+    def update(self):
+        if self.y > -50:
+            self.y -= step+10
+        else:
+            pass
+    
+class asteroid(GameSprite):
+    
+    def update(self):
+        
+        if self.x < 0:
+            self.step = 5
+        
+        elif self.x > 810:
+            self.step = -5
+        
+        if self.step == -5:
+            self.tols = self.array[0]
+            self.persona = transform.scale(image.load(self.tols),(self.l,self.w))
+        elif self.step == 5:
+            self.tols = self.array[1]
+            self.persona = transform.scale(image.load(self.tols),(self.l,self.w))
+
+        self.x += self.step
+        self.y += step
+
+
+hero = player("png/pers.png",200,500)
+all_sprite.add(hero)
+
+
+
+
+game = True
+while game:
+    
+    
+    
+    for i in event.get():
+        if i.type == QUIT:
+            game = False
+        if i.type == MOUSEBUTTONDOWN:
+            x,y = i.pos
+            print(x,y)
+    
+    going = key.get_pressed()
+
+    #region движение пули(не доработано)
+    if going[K_UP] and minuts >= 5:
+        pul = bullet("png/fireboll.png",hero.x+35,hero.y,30,30)
+        list_bullet.add(pul)
+        all_sprite.add(pul)
+        minuts = 0
+
+    if len(list_bullet) != 0:
+        for i in list_bullet:
+            if i.y < -50:
+                i.kill()
+                print(2)
+    #endregion            
+    
+    if patronage_ateroud >= 30:
+        var = randint(1,2) - 1
+        angry = asteroid(body_asteroid[var],randrange(0,760,10),-50,50,50)
+        list_meteor.add(angry)
+        all_sprite.add(angry)
+        patronage_ateroud = 0
+        
+            
+    window.blit(fon,(0,0))
+    for i in all_sprite:
+            i.update()
+            i.DRAW()
+    
+
+    minuts += 1
+    patronage_ateroud += 1
+    display.update()
+    clock.tick(FPS)
